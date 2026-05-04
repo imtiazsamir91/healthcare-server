@@ -1,7 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import { prisma } from "./app/lib/prisma";
-import { SpecialtyRouter } from "./app/lib/module/specialty/specialty.route";
+//import { SpecialtyRouter } from "./app/lib/module/specialty/specialty.route";
 import { indexRouter } from "./app/routes";
+import { globalErrorhandler } from "./app/middleware/globalErrorHandler";
 
 const app:Application = express();
 
@@ -23,5 +24,7 @@ app.get('/', async (req: Request, res: Response) => {
     data: speciality
   });
 });
+
+app.use(globalErrorhandler);
 
 export default app;
