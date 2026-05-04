@@ -1,0 +1,27 @@
+import express, { Application, Request, Response } from "express";
+import { prisma } from "./app/lib/prisma";
+import { SpecialtyRouter } from "./app/lib/module/specialty/specialty.route";
+import { indexRouter } from "./app/routes";
+
+const app:Application = express();
+
+app.use (express.urlencoded({ extended: true }));
+
+app.use(express.json());
+app.use('/api/v1', indexRouter);
+
+app.get('/', async (req: Request, res: Response) => {
+
+  const speciality = await prisma.speciality.create({
+    data: {
+      title: "Cardiology"
+    }
+  });
+  res.status(200).json({
+    success:true,
+    message:"Welcome to PH Healthcare API",
+    data: speciality
+  });
+});
+
+export default app;
