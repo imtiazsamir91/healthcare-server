@@ -1,4 +1,6 @@
+import status from "http-status";
 import { Role, userStatus } from "../../../generated/prisma/client";
+import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 
@@ -22,7 +24,8 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
     });
 
     if (!authResponse || !authResponse.user) {
-        throw new Error("User registration failed");
+        // throw new Error("User registration failed");
+        throw new AppError(status.INTERNAL_SERVER_ERROR, "User registration failed");
     }
 
     try {
@@ -54,9 +57,7 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
         
         console.error("Patient registration transaction failed:", error);
         await prisma.user.delete({ where: { id: authResponse.user.id } });
-        
-        
-        throw new Error(error.message || "Failed to complete patient registration");
+        throw new AppError(status.INTERNAL_SERVER_ERROR, error.message || "Failed to complete patient registration");
     }
 }
 
@@ -76,16 +77,17 @@ const loginUser = async (payload: ILoginPayload) => {
     });
 
     if (!response || !response.user) {
-        throw new Error("Invalid email or password");
+        // throw new Error("Invalid email or password");
+        throw new AppError(status.UNAUTHORIZED, "Invalid email or password");
     }
 
    
     if (response.user.status === userStatus.BLOCKED) {
-        throw new Error("User is blocked. Please contact support.");
+        throw new AppError(status.FORBIDDEN, "User is blocked. Please contact support.");
     }
 
     if (response.user.isDeleted) {
-        throw new Error("User account has been deleted.");
+        throw new AppError(status.GONE, "User account has been deleted.");
     }
 
     return response;
