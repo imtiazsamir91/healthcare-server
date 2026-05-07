@@ -31,9 +31,31 @@ const setAccessTokenCookie = (res: Response, token: string) => {
         maxAge: 60 * 60 * 24 * 1000,
     });
 }
+const setRefreshTokenCookie = (res: Response, token: string) => {
+    CookieUtils.setCookie(res, 'refreshToken', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: '/',
+        //7d
+        maxAge: 60 * 60 * 24 * 1000 * 7,
+    });
+}
+const setBetterAuthSessionCookie = (res: Response, token: string) => {
+    CookieUtils.setCookie(res, "better-auth.session_token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: '/',
+        //1 day
+        maxAge: 60 * 60 * 24 * 1000,
+    });
+}
 
 export const tokenUtils = {
     getAccessToken,
     getRefreshToken,
-    setAccessTokenCookie
+    setAccessTokenCookie,
+    setRefreshTokenCookie,
+    setBetterAuthSessionCookie
 }

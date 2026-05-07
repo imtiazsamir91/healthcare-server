@@ -48,11 +48,37 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
                     status: userStatus.ACTIVE
                 }
             });
+           
 
             return patientTx;
         });
 
-        return { user: authResponse.user, patient: patientData };
+          const accessToken = tokenUtils.getAccessToken({
+        userId: authResponse.user.id,
+        role: authResponse.user.role,
+        name: authResponse.user.name,
+        email: authResponse.user.email,
+        status: authResponse.user.status,
+        isDeleted: authResponse.user.isDeleted,
+        emailVerified: authResponse.user.emailVerified,
+    });
+
+    const refreshToken = tokenUtils.getRefreshToken({
+        userId: authResponse.user.id,
+        role: authResponse.user.role,
+        name: authResponse.user.name,
+        email: authResponse.user.email,
+        status: authResponse.user.status,
+        isDeleted: authResponse.user.isDeleted,
+        emailVerified: authResponse.user.emailVerified,
+    });
+
+        return { user: authResponse.user,
+            patient: patientData, 
+            accessToken,
+            refreshToken,
+            token: authResponse.token 
+        };
 
     } catch (error: any) {
         
