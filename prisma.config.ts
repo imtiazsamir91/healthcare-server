@@ -4,7 +4,7 @@ import "dotenv/config";
 // import process from "node:process";
 import { defineConfig } from "prisma/config";
 import process from "process";
-import { envVars } from "./src/config/env";
+import { envVars } from "./src/app/config/env";
 
 export default defineConfig({
   schema: "prisma",

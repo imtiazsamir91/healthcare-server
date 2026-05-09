@@ -75,7 +75,7 @@ export const auth = betterAuth({
             }
         }
     },
-    trustedOrigins: ["http://localhost:5173", "http://localhost:5000"],
+   
     // advanced:{
     //     disableCSRFCheck: true
     // },
@@ -149,6 +149,7 @@ plugins: [
     redirectURLs:{
         signIn : `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`,
     },
+    trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:5000", envVars.FRONTEND_URL],
     advanced: {
         // disableCSRFCheck: true,
         useSecureCookies : false,
