@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
-import { Role } from "../../generated/prisma/enums";
+import { Role, userStatus } from "../../generated/prisma/enums";
 import { bearer, emailOTP } from "better-auth/plugins";
 import { sendEmail } from "../utils/email";
+import { envVars } from "../config/env";
 //import { Role } from '@prisma/client';
 
 // If your Prisma file is located elsewhere, you can change the path
@@ -11,12 +12,31 @@ import { sendEmail } from "../utils/email";
 
 
 export const auth = betterAuth({
+    baseURL: envVars.BETTER_AUTH_URL,
+    secret: envVars.BETTER_AUTH_SECRET,
     database: prismaAdapter(prisma, {
         provider: "postgresql", // or "mysql", "postgresql", ...etc
     }),
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
+    },
+    socialProviders:{
+        google:{
+            clientId: envVars.GOOGLE_CLIENT_ID,
+            clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+            // callbackUrl: envVars.GOOGLE_CALLBACK_URL,
+            mapProfileToUser: ()=>{
+                return {
+                    role : Role.PATIENT,
+                    status : userStatus.ACTIVE,
+                    needPasswordChange : false,
+                    emailVerified : true,
+                    isDeleted : false,
+                    deletedAt : null,
+                }
+            }
+        }
     },
 
     emailVerification:{
@@ -56,9 +76,9 @@ export const auth = betterAuth({
         }
     },
     trustedOrigins: ["http://localhost:5173", "http://localhost:5000"],
-    advanced:{
-        disableCSRFCheck: true
-    },
+    // advanced:{
+    //     disableCSRFCheck: true
+    // },
 
 plugins: [
         bearer(),
@@ -126,4 +146,29 @@ plugins: [
             maxAge: 60 * 60 * 60 * 24, // 1 day in seconds
         }
     },
+    redirectURLs:{
+        signIn : `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`,
+    },
+    advanced: {
+        // disableCSRFCheck: true,
+        useSecureCookies : false,
+        cookies:{
+            state:{
+                attributes:{
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                }
+            },
+            sessionToken:{
+                attributes:{
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                }
+            }
+        }
+    }
 });

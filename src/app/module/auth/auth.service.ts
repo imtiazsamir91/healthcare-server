@@ -358,7 +358,85 @@ const forgetPassword = async (email : string) => {
         }
     })
 }
+const resetPassword = async (email : string, otp : string, newPassword : string) => {
+    const isUserExist = await prisma.user.findUnique({
+        where: {
+            email,
+        }
+    })
 
+    if (!isUserExist) {
+        throw new AppError(status.NOT_FOUND, "User not found");
+    }
+
+    if (!isUserExist.emailVerified) {
+        throw new AppError(status.BAD_REQUEST, "Email not verified");
+    }
+
+    if (isUserExist.isDeleted || isUserExist.status === userStatus.DELETED) {
+        throw new AppError(status.NOT_FOUND, "User not found");
+    }
+
+    await auth.api.resetPasswordEmailOTP({
+        body:{
+            email,
+            otp,
+            password : newPassword,
+        }
+    })
+
+    if (isUserExist.needsPasswordReset) {
+        await prisma.user.update({
+            where: {
+                id: isUserExist.id,
+            },
+            data: {
+                needsPasswordReset: false,
+            }
+        })
+    }
+
+    await prisma.session.deleteMany({
+        where:{
+            userId : isUserExist.id,
+        }
+    })
+}
+const googleLoginSuccess = async (session : Record<string, any>) =>{
+    const isPatientExists = await prisma.patient.findUnique({
+        where : {
+            userId : session.user.id,
+        }
+    })
+
+    if(!isPatientExists){
+        await prisma.patient.create({
+            data : {
+                userId : session.user.id,
+                name : session.user.name,
+                email : session.user.email,
+            }
+        
+        })
+    }
+
+    const accessToken = tokenUtils.getAccessToken({
+        userId: session.user.id,
+        role: session.user.role,
+        name: session.user.name,
+    });
+
+    const refreshToken = tokenUtils.getRefreshToken({
+        userId: session.user.id,
+        role: session.user.role,
+        name: session.user.name,
+    });
+
+    return {
+        accessToken,
+        refreshToken,
+    }
+}
 
 export const AuthService = {
     registerPatient,
@@ -369,4 +447,6 @@ export const AuthService = {
     logoutUser,
     verifyEmail,
     forgetPassword,
+    resetPassword,
+    googleLoginSuccess,
 }

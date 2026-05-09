@@ -6,8 +6,14 @@ import { indexRouter } from "./app/routes";
 import { notFound } from "./app/middleware/notFound";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import cookieParser from "cookie-parser";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./app/lib/auth";
+import path from "path/win32";
 
 const app:Application = express();
+app.set("view engine", "ejs");
+app.set("views",path.resolve(process.cwd(), `src/app/templates`) )
+app.use("/api/auth", toNodeHandler(auth))
 
 app.use (express.urlencoded({ extended: true }));
 
