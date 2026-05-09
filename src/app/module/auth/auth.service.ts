@@ -7,8 +7,9 @@ import { tokenUtils } from "../../utils/token";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload } from "jsonwebtoken";
-import { envVars } from "../../../config/env";
+
 import { IChangePasswordPayload } from "./auth.interface";
+import { envVars } from "../../config/env";
 
 interface RegisterPatientPayload {
     name: string;
@@ -312,26 +313,51 @@ const logoutUser = async (sessionToken : string) => {
     return result;
 }
 
-// const verifyEmail = async (email : string, otp : string) => {
+const verifyEmail = async (email : string, otp : string) => {
 
-//     const result = await auth.api.verifyEmailOTP({
-//         body:{
-//             email,
-//             otp,
-//         }
-//     })
+    const result = await auth.api.verifyEmailOTP({
+        body:{
+            email,
+            otp,
+        }
+    })
 
-//     if(result.status && !result.user.emailVerified){
-//         await prisma.user.update({
-//             where : {
-//                 email,
-//             },
-//             data : {
-//                 emailVerified: true,
-//             }
-//         })
-//     }
-// }
+    if(result.status && !result.user.emailVerified){
+        await prisma.user.update({
+            where : {
+                email,
+            },
+            data : {
+                emailVerified: true,
+            }
+        })
+    }
+}
+const forgetPassword = async (email : string) => {
+    const isUserExist = await prisma.user.findUnique({
+        where : {
+            email,
+        }
+    })
+
+    if(!isUserExist){
+        throw new AppError(status.NOT_FOUND, "User not found");
+    }
+
+    if(!isUserExist.emailVerified){
+        throw new AppError(status.BAD_REQUEST, "Email not verified");
+    }
+
+    if(isUserExist.isDeleted || isUserExist.status === userStatus.DELETED){
+        throw new AppError(status.NOT_FOUND, "User not found"); 
+    }
+
+    await auth.api.requestPasswordResetEmailOTP({
+        body:{
+            email,
+        }
+    })
+}
 
 
 export const AuthService = {
@@ -341,4 +367,6 @@ export const AuthService = {
     getNewToken,
     changePassword,
     logoutUser,
+    verifyEmail,
+    forgetPassword,
 }

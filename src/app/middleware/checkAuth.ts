@@ -7,7 +7,8 @@ import AppError from "../errorHelpers/AppError";
 import { prisma } from "../lib/prisma";
 import { CookieUtils } from "../utils/cookie";
 import { jwtUtils } from "../utils/jwt";
-import { envVars } from "../../config/env";
+import { envVars } from "../config/env";
+
 
 export const checkAuth = (...authRoles: Role[]) => async (req: Request, res: Response, next: NextFunction) => {
     try {

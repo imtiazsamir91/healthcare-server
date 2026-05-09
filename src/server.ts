@@ -6,7 +6,8 @@ import express, { Application } from "express";
 //   console.log(`Server is running on port ${PORT}`);
 // });
 import app from "./app";
-import { envVars } from "./config/env";
+import { envVars } from "./app/config/env";
+
 
 const bootstrap = () => {
     try {

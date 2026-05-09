@@ -2,7 +2,8 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/client";
 import { env } from "process";
-import { envVars } from "../../config/env";
+import { envVars } from "../config/env";
+
 //import { PrismaClient } from "@prisma/client/extension";
 //import { PrismaClient } from "../generated/prisma/client";
 
