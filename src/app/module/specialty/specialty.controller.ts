@@ -8,16 +8,23 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 
 
 
-const createSpecialty = catchAsync(async (req: Request, res: Response) => {
-    const payload = req.body;
-    const result = await SpecialtyService.createSpecialty(payload);
-    sendResponse(res, {
-        httpStatusCode: 201,
-        success: true,
-        data: result,
-        message: "Specialty created successfully"
-    });
-});
+const createSpecialty = catchAsync(
+    async (req: Request, res: Response) => {
+        console.log(req.body);
+        console.log(req.file);
+        const payload = {
+            ...req.body,
+            icon : req.file?.path
+        };
+        const result = await SpecialtyService.createSpecialty(payload);
+        sendResponse(res, {
+            httpStatusCode: 201,
+            success: true,
+            message: 'Specialty created successfully',
+            data: result
+        });
+    }
+)
 
 const getAllSpecialty = catchAsync(async (req:Request, res: Response) => {
     const result = await SpecialtyService.getAllSpecialty();
