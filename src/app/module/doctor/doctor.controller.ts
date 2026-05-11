@@ -1,23 +1,27 @@
 import { Request, Response } from "express";
+import status from "http-status";
+import { IQueryParams } from "../../interfaces/query.interface";
 import { catchAsync } from "../../shared/catchAsync";
-import { DoctorService } from "./doctor.service";
 
+import { DoctorService } from "./doctor.service";
 import { sendResponse } from "../../shared/sendresponse";
 
-import status from "http-status";
+const getAllDoctors = catchAsync(
+    async (req: Request, res: Response) => {
+        const query = req.query;
 
-const getAllDoctors = catchAsync(async (req:Request, res:Response) => {
-    const result = await DoctorService.getAllDoctors();
+        const result = await DoctorService.getAllDoctors(query as IQueryParams);
 
-    
+        sendResponse(res, {
+            httpStatusCode: status.OK,
+            success: true,
+            message: "Doctors fetched successfully",
+            data: result.data,
+            meta: result.meta
+        })
+    }
+)
 
-   sendResponse(res, {
-    httpStatusCode: status.OK,
-    success: true,
-    message: "Doctors retrieved successfully",
-    data: result,
-   })
-})
 const getDoctorById = catchAsync(
     async (req: Request, res: Response) => {
         const { id } = req.params;
@@ -68,6 +72,5 @@ export const DoctorController = {
     getAllDoctors,
     getDoctorById,
     updateDoctor,
-    deleteDoctor
-}
-  
+    deleteDoctor,
+};
