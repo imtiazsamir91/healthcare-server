@@ -1,15 +1,11 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma";
-import { Role, userStatus } from "../../generated/prisma/enums";
 import { bearer, emailOTP } from "better-auth/plugins";
-import { sendEmail } from "../utils/email";
+import { Role, userStatus } from "../../generated/prisma/enums";
 import { envVars } from "../config/env";
-//import { Role } from '@prisma/client';
-
+import { sendEmail } from "../utils/email";
+import { prisma } from "./prisma";
 // If your Prisma file is located elsewhere, you can change the path
-
-
 
 export const auth = betterAuth({
     baseURL: envVars.BETTER_AUTH_URL,
@@ -17,10 +13,12 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql", // or "mysql", "postgresql", ...etc
     }),
+
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
     },
+
     socialProviders:{
         google:{
             clientId: envVars.GOOGLE_CLIENT_ID,
@@ -45,42 +43,41 @@ export const auth = betterAuth({
         autoSignInAfterVerification: true,
     },
 
-    user:{
-        additionalFields:{
-            role:{
-                type:"string",
-                required:true,
-                defaultValue:Role.PATIENT
+    user: {
+        additionalFields: {
+            role: {
+                type: "string",
+                required: true,
+                defaultValue: Role.PATIENT
             },
-            status:{
-                type:"string",
-                required:true,
-                defaultValue:"ACTIVE"
-            },
-            needsPasswordReset:{
 
-                type:"boolean",
-                required:true,
-                defaultValue:true
+            status: {
+                type: "string",
+                required: true,
+                defaultValue: userStatus.ACTIVE
             },
-            isDeleted:{
-                type:"boolean",
-                required:true,
-                defaultValue:false
+
+            needsPasswordReset: {
+                type: "boolean",
+                required: true,
+                defaultValue: false
             },
-            deletedAt:{
-                type:"date",
-                required:false,
-                defaultValue:null
-            }
+
+            isDeleted: {
+                type: "boolean",
+                required: true,
+                defaultValue: false
+            },
+
+            deletedAt: {
+                type: "date",
+                required: false,
+                defaultValue: null
+            },
         }
     },
-   
-    // advanced:{
-    //     disableCSRFCheck: true
-    // },
 
-plugins: [
+    plugins: [
         bearer(),
         emailOTP({
             overrideDefaultEmailVerification: true,
@@ -146,10 +143,13 @@ plugins: [
             maxAge: 60 * 60 * 60 * 24, // 1 day in seconds
         }
     },
+
     redirectURLs:{
         signIn : `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`,
     },
+
     trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:5000", envVars.FRONTEND_URL],
+
     advanced: {
         // disableCSRFCheck: true,
         useSecureCookies : false,
@@ -172,4 +172,5 @@ plugins: [
             }
         }
     }
+
 });

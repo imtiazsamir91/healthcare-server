@@ -11,8 +11,10 @@ import { auth } from "./app/lib/auth";
 import path from "path/win32";
 import { envVars } from "./app/config/env";
 import cors from "cors";
+import cron from "node-cron";
 import qs from "qs";
 import { PaymentController } from "./app/module/payment/payment.controller";
+import { AppointmentService } from "./app/module/appointment/appointment.service";
 
 const app:Application = express();
 app.set("query parser", (str : string) => qs.parse(str));
@@ -31,6 +33,14 @@ app.use(cors({
 app.use("/api/auth", toNodeHandler(auth))
 
 app.use(express.urlencoded({ extended: true }));
+cron.schedule("*/25 * * * *", async () => {
+    try {
+        console.log("Running cron job to cancel unpaid appointments...");
+        await AppointmentService.cancelUnpaidAppointments();
+    } catch (error : any) {
+        console.error("Error occurred while canceling unpaid appointments:", error.message);    
+    }
+})
 
 
 
